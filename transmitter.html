@@ -1,0 +1,158 @@
+<html>
+<head>
+    <style>
+        #location-container {
+            width: 100%;
+            height: 10%;
+            position: fixed;
+        }
+
+        #user-location-div {
+            float: left;
+            height: 10%;
+            position: relative;
+        }
+
+        #googleMap {
+            width: 1200px;
+            height: 600px;
+            position: fixed;
+            overflow: hidden;
+            top: 10%;
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDA5w4IA_fIDe8Iex8ybjYf8N7a2hMNkGA"></script>
+</head>
+<body>
+    <div id="location-container">
+        <div id="user-location-div">
+            <label>Transmitted User Location</label>
+            <div id="">
+                <div id="startLat"></div>
+                <div id="startLon"></div>
+            </div>
+        </div>
+    </div>
+    <div id="googleMap" style="width:1200px;height:600px;"></div>
+    <script>
+          var socket = io.connect();
+          var deviceSessionId;
+
+          socket.on('message', function (data) {
+              console.log(data.message);
+          });
+
+          socket.on('deviceSessionData', function (data) {
+              console.log(data.deviceSessionId);
+
+              deviceSessionId = data.deviceSessionId;
+
+              initialize();
+              /* Monitor User Location */
+              getUserLocation();
+          });
+
+          /* Method that returns location co-ordinates of the user */
+          function getUserLocation() {
+              options = {
+                  enableHighAccuracy: true,
+                  timeout: 5000,
+                  maximumAge: 0
+              };
+
+              // Reference: https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition
+              id = navigator.geolocation.watchPosition(sendBusLocation, error, options);
+          }
+
+          function error(err) {
+              console.warn('ERROR(' + err.code + '): ' + err.message);
+          }
+
+
+          /* Method that sends the bus current location to server */
+          function sendBusLocation(pos) {
+              var busLocation = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+              //socket.emit('buslocation', busLocation);
+              var busLocationData = { 'deviceSessionId': deviceSessionId, 'lat': busLocation.lat(), 'lng': busLocation.lng() };
+              socket.emit('buslocation', busLocationData);
+
+              updateUserLocation(busLocation);
+          }
+
+          /***** Page Variables *****/
+
+          /* Represents the Map object */
+          var map;
+
+          /* Object that represents Custom Bus Marker */
+          var busMarker;
+
+          var busLocation = new google.maps.LatLng(18.52592091234, 73.82753751221);
+
+          /***** Google Maps methods *****/
+
+          /* Method that initializes the Map Object */
+          function initialize() {
+              debugger;
+              /* Stores the map properties */
+              var mapProp = {
+                  center: new google.maps.LatLng(18.52592091234, 73.82753751221),
+                  zoom: 18,
+                  mapTypeId: google.maps.MapTypeId.ROADMAP
+              };
+
+              // Create a map object
+              map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+
+              /* Add a custom marker on the map */
+              busMarker = new google.maps.Marker({
+                  position: busLocation,
+                  icon: "https://buslocatorapp.herokuapp.com/static/bus_18_2x.png",
+                  map: map
+              });
+
+              // Reference: https://developers.google.com/maps/documentation/javascript/examples/polyline-complex
+              // Create a new polyline which would display the route of the bus
+              busRoutePolyline = new google.maps.Polyline({
+                  strokeColor: '#000000',
+                  strokeOpacity: 1.0,
+                  strokeWeight: 3
+              });
+              busRoutePolyline.setMap(map);
+
+              ///* Monitor User Location */
+              //getUserLocation();
+          }
+
+          /* Event listener for Window Load event */
+          //google.maps.event.addDomListener(window, 'load', initialize);
+
+          /* Method that updates the user's current location */
+          function updateUserLocation(busLocation) {
+              document.getElementById('startLat').innerHTML = busLocation.lat();
+              document.getElementById('startLon').innerHTML = busLocation.lng();
+
+              //// TODO: Update user location on map
+              //busLocation = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+              busMarker.setPosition(busLocation);
+
+              var currCenter = map.getCenter();
+              google.maps.event.trigger(map, 'resize');
+              // Re-center map to the current bus location
+              map.setCenter(busLocation);
+
+              // Get the path of the bus from the polyline
+              var busPath = busRoutePolyline.getPath();
+
+              // Because path is an MVCArray, we can simply append a new coordinate
+              // and it will automatically appear.
+              // Append the current bus location to the bus path
+              busPath.push(busLocation);
+          }
+    </script>
+</body>
+</html>

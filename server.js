@@ -11,6 +11,19 @@ var server = http.createServer(function (request, response) {
     switch (path) {
         case '/':
             path = "/index.html";
+        case '/transmitter.html':
+            fs.readFile(__dirname + path, function (error, data) {
+                if (error) {
+                    response.writeHead(404);
+                    response.write('File not found!');
+                    response.end();
+                }
+                else {
+                    response.writeHead(200, { 'Content-Type': 'text/html' });
+                    response.write(data, "utf8");
+                    response.end();
+                }
+            });
             break;
         default:
             response.writeHead(404);
@@ -34,10 +47,13 @@ global.deviceLocationData = [];
 /* Array that holds the session data for all the connected clients */
 global.allClients = [];
 
+
 listener.sockets.on('connection', function (socket) {
     /* Push the current socket to the allClients array */
     allClients.push(socket);
     var deviceSessionId = allClients.indexOf(socket);
+
+    //global.testContext = global.testContext + 1;
 
     socket.emit('message', { 'message': 'hello world'});
 
@@ -68,9 +84,5 @@ listener.sockets.on('connection', function (socket) {
             //'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng,
             'deviceLocationData': global.deviceLocationData
         });
-    });
-
-    socket.on('chat message', function(msg){
-    	socket.emit('chat message', msg);
     });
 });
