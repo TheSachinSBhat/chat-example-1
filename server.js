@@ -12,7 +12,6 @@ var server = http.createServer(function (request, response) {
         case '/':
             path = "/index.html";
 	case '/chat':
-            path = "/chat.html";
         case '/transmitter.html':
             fs.readFile(__dirname + path, function (error, data) {
                 if (error) {
