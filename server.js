@@ -86,4 +86,9 @@ listener.sockets.on('connection', function (socket) {
             'deviceLocationData': global.deviceLocationData
         });
     });
+
+    socket.on('chat message', function(msg){
+	socket.emit('chat message', msg);
+    });
+
 });
