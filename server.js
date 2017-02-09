@@ -52,10 +52,6 @@ listener.sockets.on('connection', function (socket) {
     allClients.push(socket);
     var deviceSessionId = allClients.indexOf(socket);
 
-    //global.testContext = global.testContext + 1;
-
-    //socket.emit('message', { 'message': 'hello world'});
-
     socket.emit('deviceSessionData', { 'deviceSessionId': deviceSessionId });
 
     socket.on('disconnect', function () {
@@ -68,22 +64,7 @@ listener.sockets.on('connection', function (socket) {
         /* Remove the location data from the deviceLocationData array */
         deviceLocationData.splice(deviceSessionId, 1);
 
-        //// TODO: Convert this into a method - broadcastBusLocationData(socket)
-        //socket.broadcast.emit('buslocationData', {
-        //    'deviceLocationData': global.deviceLocationData
-        //});
     });
-
-    //socket.on('buslocation', function (busLocation) {
-
-    //    global.deviceLocationData[busLocation.deviceSessionId] = { 'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng };
-
-    //    // TODO: Convert this into a method - broadcastBusLocationData(socket)
-    //    socket.broadcast.emit('buslocationData', {
-    //        //'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng,
-    //        'deviceLocationData': global.deviceLocationData
-    //    });
-    //});
 
     socket.on('chat message', function(msg){
 	socket.emit('chat message', msg);
