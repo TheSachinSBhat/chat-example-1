@@ -54,7 +54,7 @@ listener.sockets.on('connection', function (socket) {
 
     //global.testContext = global.testContext + 1;
 
-    socket.emit('message', { 'message': 'hello world'});
+    //socket.emit('message', { 'message': 'hello world'});
 
     socket.emit('deviceSessionData', { 'deviceSessionId': deviceSessionId });
 
@@ -68,22 +68,22 @@ listener.sockets.on('connection', function (socket) {
         /* Remove the location data from the deviceLocationData array */
         deviceLocationData.splice(deviceSessionId, 1);
 
-        // TODO: Convert this into a method - broadcastBusLocationData(socket)
-        socket.broadcast.emit('buslocationData', {
-            'deviceLocationData': global.deviceLocationData
-        });
+        //// TODO: Convert this into a method - broadcastBusLocationData(socket)
+        //socket.broadcast.emit('buslocationData', {
+        //    'deviceLocationData': global.deviceLocationData
+        //});
     });
 
-    socket.on('buslocation', function (busLocation) {
+    //socket.on('buslocation', function (busLocation) {
 
-        global.deviceLocationData[busLocation.deviceSessionId] = { 'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng };
+    //    global.deviceLocationData[busLocation.deviceSessionId] = { 'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng };
 
-        // TODO: Convert this into a method - broadcastBusLocationData(socket)
-        socket.broadcast.emit('buslocationData', {
-            //'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng,
-            'deviceLocationData': global.deviceLocationData
-        });
-    });
+    //    // TODO: Convert this into a method - broadcastBusLocationData(socket)
+    //    socket.broadcast.emit('buslocationData', {
+    //        //'deviceSessionId': busLocation.deviceSessionId, 'lat': busLocation.lat, 'lng': busLocation.lng,
+    //        'deviceLocationData': global.deviceLocationData
+    //    });
+    //});
 
     socket.on('chat message', function(msg){
 	socket.emit('chat message', msg);
